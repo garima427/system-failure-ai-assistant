@@ -1,0 +1,12 @@
+pandas>=1.5.0
+numpy>=1.22.0
+matplotlib>=3.5.0
+seaborn>=0.12.0
+scikit-learn>=1.1.0
+shap>=0.41.0
+streamlit>=1.25.0
+joblib>=1.2.0
+plotly>=5.0.0
+python-dotenv>=0.19.0
+openai>=1.0.0  # For LLM API (can be replaced with other providers)
+jupyter>=1.0.0
