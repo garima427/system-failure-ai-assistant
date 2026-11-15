@@ -240,7 +240,7 @@ class ModelTrainer:
         plt.xlabel('False Positive Rate')
         plt.ylabel('True Positive Rate')
         plt.title(f'ROC Curve - {model_name}')
-        plt.legend([f'{model_name} (AUC = {self.results[model_name]["roc_auc"]:.3f})', 'Random'])
+        plt.legend([f'{model_name}', 'Random'])
         plt.grid(True, alpha=0.3)
         plt.tight_layout()
         plt.show()

@@ -72,40 +72,50 @@ class SystemTelemetryGenerator:
         np.random.seed(random_state)
         
         # Define parameters for normal operations (healthy systems)
+        # INCREASED SEPARATION: Lower means for normal operations
         self.normal_means = np.array([
-            45.0,   # CPU_Temperature
-            35.0,   # CPU_Usage
-            40.0,   # RAM_Usage
-            45.0,   # Disk_Usage
-            1800.0, # Fan_Speed
-            1.0,    # Error_Count
-            300.0   # Runtime_Hours
+            38.0,   # CPU_Temperature (lower)
+            25.0,   # CPU_Usage (lower)
+            30.0,   # RAM_Usage (lower)
+            35.0,   # Disk_Usage (lower)
+            1200.0, # Fan_Speed (lower)
+            0.3,    # Error_Count (much lower)
+            200.0   # Runtime_Hours (younger systems)
         ])
         
         # Define parameters for failure-prone operations
+        # INCREASED SEPARATION: Higher means for failure-prone operations
         self.failure_means = np.array([
-            75.0,   # CPU_Temperature (higher)
-            80.0,   # CPU_Usage (higher)
-            85.0,   # RAM_Usage (higher)
-            75.0,   # Disk_Usage (higher)
-            3200.0, # Fan_Speed (higher - trying to cool)
-            15.0,   # Error_Count (much higher)
-            800.0   # Runtime_Hours (older systems)
+            85.0,   # CPU_Temperature (much higher)
+            92.0,   # CPU_Usage (much higher)
+            90.0,   # RAM_Usage (much higher)
+            88.0,   # Disk_Usage (much higher)
+            4200.0, # Fan_Speed (much higher)
+            30.0,   # Error_Count (much higher)
+            1500.0  # Runtime_Hours (much older)
         ])
         
-        # Standard deviations for normal operations
+        # Standard deviations for normal operations (reduced for tighter clusters)
         self.normal_stds = np.array([
-            8.0,    # CPU_Temperature
-            12.0,   # CPU_Usage
-            10.0,   # RAM_Usage
-            12.0,   # Disk_Usage
-            400.0,  # Fan_Speed
-            2.0,    # Error_Count
-            200.0   # Runtime_Hours
+            4.0,    # CPU_Temperature (reduced for tighter cluster)
+            6.0,    # CPU_Usage (reduced for tighter cluster)
+            5.0,    # RAM_Usage (reduced for tighter cluster)
+            6.0,    # Disk_Usage (reduced for tighter cluster)
+            200.0,  # Fan_Speed (reduced for tighter cluster)
+            0.8,    # Error_Count (reduced for tighter cluster)
+            100.0   # Runtime_Hours (reduced for tighter cluster)
         ])
         
-        # Standard deviations for failure-prone operations (more variability)
-        self.failure_stds = self.normal_stds * 1.3
+        # Standard deviations for failure-prone operations (reduced for tighter clusters)
+        self.failure_stds = np.array([
+            5.0,    # CPU_Temperature (reduced for tighter cluster)
+            8.0,    # CPU_Usage (reduced for tighter cluster)
+            7.0,    # RAM_Usage (reduced for tighter cluster)
+            8.0,    # Disk_Usage (reduced for tighter cluster)
+            300.0,  # Fan_Speed (reduced for tighter cluster)
+            2.0,    # Error_Count (reduced for tighter cluster)
+            150.0   # Runtime_Hours (reduced for tighter cluster)
+        ])
         
         # Correlation matrix - features are correlated in real systems
         # For example: high CPU temp correlates with high CPU usage and fan speed
@@ -213,15 +223,15 @@ class SystemTelemetryGenerator:
         Returns:
             Array of failure probabilities (0-1)
         """
-        # Feature weights - reflect real-world importance
+        # Feature weights - INCREASED SEPARATION: Stronger weights for clear discrimination
         weights = np.array([
-            0.15,   # CPU_Temperature (very important)
-            0.12,   # CPU_Usage (important)
-            0.10,   # RAM_Usage (important)
-            0.08,   # Disk_Usage (moderately important)
-            -0.05,  # Fan_Speed (higher fan speed reduces risk - cooling works)
-            0.20,   # Error_Count (very strong predictor)
-            0.10    # Runtime_Hours (older systems more prone to failure)
+            0.25,   # CPU_Temperature (increased importance)
+            0.20,   # CPU_Usage (increased importance)
+            0.18,   # RAM_Usage (increased importance)
+            0.15,   # Disk_Usage (increased importance)
+            -0.10,  # Fan_Speed (higher fan speed reduces risk - increased importance)
+            0.30,   # Error_Count (very strong predictor - increased importance)
+            0.15    # Runtime_Hours (increased importance)
         ])
         
         # Normalize features to 0-1 range for probability calculation
@@ -230,14 +240,14 @@ class SystemTelemetryGenerator:
         # Linear combination of weighted features
         linear_score = np.dot(normalized_features, weights)
         
-        # Add interaction terms (realistic: high temp + high usage = much higher risk)
-        temp_usage_interaction = (normalized_features[:, 0] * normalized_features[:, 1]) * 0.20
-        error_runtime_interaction = (normalized_features[:, 5] * normalized_features[:, 6]) * 0.15
+        # Add interaction terms (INCREASED SEPARATION: Stronger interactions)
+        temp_usage_interaction = (normalized_features[:, 0] * normalized_features[:, 1]) * 0.30  # Increased
+        error_runtime_interaction = (normalized_features[:, 5] * normalized_features[:, 6]) * 0.25  # Increased
         
         linear_score += temp_usage_interaction + error_runtime_interaction
         
-        # Add bias term to adjust overall probability
-        bias = -0.6
+        # Add bias term (INCREASED SEPARATION: Less negative bias for higher failure probabilities)
+        bias = -0.3  # Changed from -0.6 to -0.3 for better separation
         
         # Apply sigmoid function to convert to probability (0-1)
         # Sigmoid: 1 / (1 + e^(-x))
