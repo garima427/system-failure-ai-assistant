@@ -300,12 +300,12 @@ class ModelTrainer:
                 0.2 * metrics['roc_auc']
             )
             self.results[model_name]['composite_score'] = composite_score
+            print(f"{model_name} - Composite Score: {composite_score:.4f} (Recall: {metrics['recall']:.4f}, F1: {metrics['f1']:.4f}, ROC-AUC: {metrics['roc_auc']:.4f})")
         
         # Select model with highest composite score
-        best_model_name = max(
-            self.results.keys(),
-            key=lambda k: self.results[k]['composite_score']
-        )
+        if not self.results:
+            print("ERROR: No models found in results!")
+            return
         
         self.best_model = self.models[best_model_name]
         self.best_model_name = best_model_name
